@@ -1,0 +1,26 @@
+package de.htwg.memory;
+
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+public class BaseConnection {
+
+	//url were the webserver is located
+	//use the alias 10.0.2.2 to referto the host computer's loopback interface
+	//private String url = "http://www.spieldose.ch/memory/memory.php";
+	//private String url = "http://10.0.2.2/memory/model/src/memory.php";
+	private String url = "http://10.0.3.2/memory/model/src/memory.php";
+   HttpPost httppost = new HttpPost(this.url);
+   DefaultHttpClient httpClient = new DefaultHttpClient();
+	
+   private static BaseConnection instance = null;
+   protected BaseConnection() {
+      // Exists only to defeat instantiation.
+   }
+   public static BaseConnection getInstance() {
+      if(instance == null) {
+         instance = new BaseConnection();
+      }
+      return instance;
+   }
+}

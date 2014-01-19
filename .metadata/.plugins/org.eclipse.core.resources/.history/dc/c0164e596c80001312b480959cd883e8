@@ -1,0 +1,191 @@
+package de.htwg.memory;
+
+import java.io.IOException;
+
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
+import android.net.Uri;
+import android.util.Log;
+import android.view.View;
+import android.view.animation.Animation;
+import android.widget.Button;
+
+/**
+ * this class represent a game card, which can be clicked and turned each card has a common backimage
+ * two cards with the same cardid have the same unique frontimage
+ * 
+ * @author Simon Schneeberger <sischnee@gmail.com>
+ * @version V1.0 18-01-2014
+ */
+public class MemoryCard extends Button {
+
+	private int cardID;
+	private Drawable backImage;
+	private Drawable frontImage;
+	private boolean clicked = false;
+	private boolean wantToTurn = false;
+	private Animation animation;
+	private int turnback;
+	private Uri path;
+		
+	/**
+	 * @param context is necessary for the super-contructor 
+	 * @param x coordinate in the table view
+	 * @param y coordinate in the table view
+	 * @param cardID card identifier
+	 */
+	public MemoryCard(Context context, int cardID) {
+		super(context);
+		this.cardID = cardID;
+		this.turnback = 0;
+		//create animation
+		
+		animation = new FlipAnimation(0.0f, -30.0f, 4.0f, 1.0f);
+		backImage =  getResources().getDrawable(R.drawable.backimage);
+		setFrontImage();
+		setBackgroundDrawable(backImage);
+	}
+	
+	/**
+	 * flips the card to the frontside
+	 */
+	public void turnFront() {
+		startAnimation(animation); 
+		setBackgroundDrawable(frontImage);
+		clicked = true;
+	}
+	
+	/**
+	 * flips the card to the backside
+	 */
+	public void turnBack() {
+		startAnimation(animation);
+		setBackgroundDrawable(backImage);
+		clicked = false;
+	}
+	
+	/**
+	 * @return the cardid which is necessary to identify a couple of cards
+	 */
+	public int getCardId() {
+		return cardID;
+	}
+
+	/**
+	 * disabled the card
+	 * card is no longer clickable or visibile
+	 */
+	public void disableCard() {
+		setVisibility(View.INVISIBLE);
+		setClicked(false);
+		setEnabled(false);
+		turnback = 0;
+	}
+			
+	
+	/**
+	 * @return the clicked-state of the card
+	 */
+	public boolean isClicked() {
+		return clicked;
+	}
+
+	/**
+	 * @param clicked set the clicked-state of the card
+	 */
+	public void setClicked(boolean clicked) {
+		this.clicked = clicked;
+	}
+	
+	/**
+	 * @param turnback set the turnback state of the card
+	 */
+	public void setTurnBack(int turnback) {
+		this.turnback = turnback;	
+	}
+	
+	/**
+	 * @return the turnback state of the card
+	 */
+	public int getTurnBack() {
+		
+		return turnback;
+	}
+	
+	/**
+	 * @return the wantToTurn state of the card
+	 */
+	public boolean getWantToTurn() {
+		return wantToTurn;
+	}
+
+	/**
+	 * @param wantToTurn set the wantToTurn state of the card
+	 */
+	public void setWantToTurn(boolean wantToTurn) {
+		this.wantToTurn = wantToTurn;
+	}
+	
+	/**
+	 * set the unique frint imgae of the card
+	 * two cards have the same front image -> rule of the memory game :)
+	 */
+	private void setFrontImage() {
+		
+		switch(cardID) {
+		case 1: 
+			frontImage =  getResources().getDrawable(R.drawable.kn_schnetztor);
+			path = Uri.parse("android.resource://de.htwg.memory/drawable/kn_schnetztor");
+			break;
+		case 2:
+			frontImage =  getResources().getDrawable(R.drawable.kn_lago);
+			path = Uri.parse("android.resource://de.htwg.memory/drawable/kn_lago");
+			break;
+		case 3:
+			frontImage =  getResources().getDrawable(R.drawable.kn_bahnhof);
+			path = Uri.parse("android.resource://de.htwg.memory/drawable/kn_bahnhof");
+			break;
+		case 4:
+			frontImage =  getResources().getDrawable(R.drawable.kn_imperia);
+			path = Uri.parse("android.resource://de.htwg.memory/drawable/kn_imperia");
+			break;
+		case 5:
+			frontImage =  getResources().getDrawable(R.drawable.kn_konzertmuschel);
+			path = Uri.parse("android.resource://de.htwg.memory/drawable/kn_konzertmuschel");
+			break;
+		case 6:
+			frontImage =  getResources().getDrawable(R.drawable.kn_muenster);
+			path = Uri.parse("android.resource://de.htwg.memory/drawable/kn_muenster");
+			break;
+		case 7:
+			frontImage =  getResources().getDrawable(R.drawable.kn_lenkbrunnen);
+			path = Uri.parse("android.resource://de.htwg.memory/drawable/kn_lenkbrunnen");
+			break;
+		case 8:
+			frontImage =  getResources().getDrawable(R.drawable.kn_bismarck);
+			path = Uri.parse("android.resource://de.htwg.memory/drawable/kn_bismarck");
+			break;
+		}
+	}	
+	
+	public Integer getLongitude(){
+		
+		ExifInterface exifInterface;
+		try {
+			exifInterface = new ExifInterface("drawable-hdpi/kn_bismarck.jpg");
+			Log.d("str",exifInterface.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 1;
+		
+	}
+	
+	public Integer getLatitude(){
+		return 1;
+		
+	}
+}

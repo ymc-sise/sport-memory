@@ -1,0 +1,163 @@
+package de.htwg.memory;
+
+import java.io.IOException;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import de.htwg.memory.activity.GameActivity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.AsyncTask;
+import android.util.Log;
+import android.view.Display;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.TableRow;
+
+/**
+ * this represent the connection class, which is necessary for the communication between android app and webserver
+ * IMPORTANT: more than one communication instance will destroy the session in the webserver 
+ *  
+ * @author Benjamin Moellerke <bemoelle@googlemail.com>
+ * @version V1.0 06-06-2012
+ * 
+ */
+public final class MemoryConnection extends AsyncTask<JSONObject, Integer, JSONArray> {
+	
+	//url were the webserver is located
+	//use the alias 10.0.2.2 to referto the host computer's loopback interface
+	//private String url = "http://www.spieldose.ch/memory/memory.php";
+	//private String url = "http://10.0.2.2/memory/model/src/memory.php";
+	private String url = "http://10.0.3.2/memory/model/src/memory.php";
+	private int switchMethod = 0;
+	
+	/**
+	 * contructor
+	 */
+	public MemoryConnection() {
+
+	}
+		
+	
+  	/* (non-Javadoc)
+	 * @see de.htwg.memory.IConnection#readMemory(int, int)
+	 */
+    public void readMemory(int row, int col) throws JSONException, IOException {
+ 	    	
+    	switchMethod = 0;
+    	
+    	JSONObject parentData = new JSONObject();
+    	parentData.put("action", "create");
+    	
+    	JSONObject childData = new JSONObject();
+    	childData.put("row", Integer.valueOf(row));
+    	childData.put("column", Integer.valueOf(col));
+    	
+       	parentData.put("params", childData);
+       	
+       	//call request function and return the result
+       	this.execute(parentData);
+       		
+       	//validMemory = true;
+       	//return object.getJSONArray("result");
+	}
+   
+    /* (non-Javadoc)
+	 * @see de.htwg.memory.IConnection#readCardState(int, int)
+	 */
+	public void readCardState(int firstCard, int secondCard) throws JSONException, IOException {
+				
+		switchMethod = 1;
+		
+		JSONObject parentData = new JSONObject();
+    	parentData.put("action", "move");
+    	
+    	JSONObject childData = new JSONObject();
+    	childData.put("firstCard", Integer.valueOf(firstCard));
+    	childData.put("secondCard", Integer.valueOf(secondCard));
+    	
+       	parentData.put("params", childData);
+
+       	//call request function and return the result
+       	this.execute(parentData);
+       	
+       	//return object.getInt("result");		
+	}
+
+	/**
+	 * @param parentData  contains parameter for the webserver for exmaple: 
+	 * { "action": "move", "params": {"firstCard": 4, "secondCard":5 } }
+	 * { "action": "create", "params": {"row": 4, "column":5 } }
+	 * @return a jsonAraay which have the response answer from webserver
+  	 * @throws JSONException from JSON
+	 * @throws JSONException  execute()
+	 */
+	@Override
+	protected JSONArray doInBackground(JSONObject... parentData) {
+		// TODO Auto-generated method stub
+        try {        	
+        	
+            HttpPost httppost = new HttpPost(this.url);
+    		httppost.setEntity(new ByteArrayEntity(parentData.toString().getBytes("UTF8")));
+
+    		DefaultHttpClient httpClient = new DefaultHttpClient();
+    		HttpResponse response = httpClient.execute(httppost);
+    		
+    		JSONObject result = null;
+    		
+    		StatusLine status = response.getStatusLine();
+            Integer statusCode = status.getStatusCode();
+            Log.d("StatusCode", statusCode.toString());
+                    
+            if (statusCode == 200) {
+            	HttpEntity entity = response.getEntity();
+            	String ret = EntityUtils.toString(entity);
+            	result = new JSONObject(ret);
+            	Log.d("result1", result.toString());
+                String re = result.getString("result");
+                
+                if(re.equals("error")) {
+                	Log.d("result", statusCode.toString());
+                	return null;
+                }
+                else {
+                	return result.getJSONArray("result");
+                }
+            }
+    		
+            return null;    		
+    		
+		} catch (Exception e) {
+			Log.e("Error", e.toString());
+		}
+
+        return null;
+	}
+	
+	@Override
+	protected void onPostExecute(JSONArray result) {
+		if ( switchMethod == 0 ){
+	        GameActivity.drawGame(result);
+		}else{
+			
+		}
+	}
+ }
+	
+	
+    

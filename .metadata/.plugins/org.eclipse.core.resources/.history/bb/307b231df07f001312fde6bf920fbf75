@@ -1,0 +1,21 @@
+package de.htwg.memory;
+
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+public class BaseConnection {
+
+   HttpPost httppost = new HttpPost(this.url);
+   DefaultHttpClient httpClient = new DefaultHttpClient();
+	
+   private static BaseConnection instance = null;
+   protected BaseConnection() {
+      // Exists only to defeat instantiation.
+   }
+   public static BaseConnection getInstance() {
+      if(instance == null) {
+         instance = new BaseConnection();
+      }
+      return instance;
+   }
+}

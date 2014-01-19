@@ -1,0 +1,246 @@
+package de.htwg.memory.activity;
+
+import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
+import org.json.JSONArray;
+import org.json.JSONException;
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
+import de.htwg.memory.CheckCards;
+import de.htwg.memory.MemoryCard;
+import de.htwg.memory.MemoryConnection;
+import de.htwg.memory.R;
+
+/**
+ * this class represent a game card, which can be clicked and turned each card has a common backimage
+ * two cards with the same cardid have the same unique frontimage
+ * 
+ * @author Simon Schneeberger <sischnee@gmail.com>
+ * @version V1.0 06-06-2012
+ * 
+ */
+public class GameActivity extends Activity {
+	
+
+	private static TableLayout table;
+	private static Context contextTable;
+	private static int x = 4;
+	private static int y = 4;
+	private static TextView anzTries;
+	private static Integer anz = 0;
+	private static GameActivity gameActivity;
+	private String name;
+	private static MemoryConnection connection = null; 
+	private static MemoryTimerTask timerTask;
+	private static Timer timer = new Timer();
+	private TextView timeView;
+	private Integer timeCounter = 0;
+	
+	
+    /** Called when the activity is first created. */
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+    	super.onCreate(savedInstanceState);
+    	
+        setContentView(R.layout.game);
+        
+        table = (TableLayout)findViewById(R.id.tableLayout1);
+        contextTable = table.getContext();  
+        
+        anzTries = (TextView)findViewById(R.id.anz);
+        anzTries.setText("0");
+               
+        name = (String) getIntent().getExtras().get("name");
+        
+        TextView nameView = (TextView)findViewById(R.id.nameText);
+        nameView.setTextColor(0xFF000000);
+        nameView.setText(name);
+        
+        gameActivity = this;
+      
+        timeView = (TextView)findViewById(R.id.time);
+        timerTask = new MemoryTimerTask();
+        
+        
+        //create new game
+        try {
+        	//create new connection
+        	connection = new MemoryConnection(); 
+        	createNewGame();
+        }
+        catch (Exception e) {
+        	Log.e("Exception GameActivity", "createGame failed");
+        	AlertDialog.Builder builder = new AlertDialog.Builder(gameActivity);
+    		builder.setTitle("ERROR")
+    		       .setCancelable(false)
+    		       .setMessage("cannot create a new game - no connection to server")
+    		       .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+    		           public void onClick(DialogInterface dialog, int id) {
+    		        	   gameActivity.finish();
+    		           }
+    		       });
+    		
+    		AlertDialog alert = builder.create();
+    		alert.show();
+		}
+    }
+    
+    /**
+     * @return playername
+     */
+    public String getName() {
+    	
+    	return name;
+    }
+    
+    /**
+     * @return count of tries
+     */
+    public int getTries() {
+    	
+    	return anz;
+    }
+    
+    /**
+     * create an new game
+     *       
+     * @param row number of rows in the memory game
+     * @param col number of columns in the memory game
+     * @throws IOException exception from readMemory()
+     * @throws JSONException exception from readMemory()
+     */
+    private void createNewGame() throws JSONException, IOException {    	
+    	//send an http request to the webserver to get the ids for the memorycards
+    	connection.readMemory(x, y);    	
+    }
+    
+     public static void drawGame(JSONArray jsonArray){
+    	
+    	//error Message if connection is interrupted
+    	if(jsonArray == null) {
+    		
+        	AlertDialog.Builder builder = new AlertDialog.Builder(gameActivity);
+    		builder.setTitle("ERROR")
+    		       .setCancelable(false)
+    		       .setMessage("cannot create a new game - no connection to server")
+    		       .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+    		           public void onClick(DialogInterface dialog, int id) {
+    		        	   gameActivity.finish();
+    		           }
+    		       });
+    		
+    		AlertDialog alert = builder.create();
+    		alert.show();
+		}else{
+			
+//	        public void schedule (TimerTask task, long delay, long period) 
+//	        Schedule a task for repeated fixed-delay execution after a specific delay.
+	//
+//	        Parameters
+//	        task  the task to schedule. 
+//	        delay  amount of time in milliseconds before first execution. 
+//	        period  amount of time in milliseconds between subsequent executions. 
+	 
+	        timer.schedule(timerTask, 1000, 1000);
+	    	
+	    	//create a new memorycard array
+	    	final MemoryCard[] cards = new MemoryCard[x*y];  	
+	    	
+	    	//fill the table layout with memory cards
+	    	for(int i=0; i<x; i++) {
+	    		
+	    		//create a new tablerow in the table layout
+	    		final TableRow tr = new TableRow(gameActivity);
+	    	    tr.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+	    	    
+	       	    for(int j=0; j<y; j++) {
+	    	    	
+	
+					try {
+		       	    	//get id for current memory card
+						Log.d("print",jsonArray.toString());
+		    	    	int id = jsonArray.getJSONArray(i).getInt(j);
+		    	    	
+		    	    	//create new memorycard and set it clickable
+		    	    	final MemoryCard card = new MemoryCard(contextTable, id);
+		    	    	card.setOnClickListener(new OnClickListener() {
+	
+		    				public void onClick(View arg0) {
+		    				       					
+		    					if(!card.isClicked()) {
+		    						card.setWantToTurn(true);
+		    						card.setTurnBack(0);
+		       					}
+		    					
+		    					else if(card.getTurnBack() == 1) {
+		    						anz++;
+		    						anzTries.setText(anz.toString());
+		    						card.setTurnBack(2);
+		    					}
+		    					//after a card is clicked start a asynctask to check whether 
+		    					//two cards are clicked
+		    					//equal -> cards disappear
+		    					//unequal -> turn arround cards
+		    					new CheckCards(gameActivity, cards, x, y).execute();
+		    					//new CheckCards(gameActivity, cards, row, col).execute();
+		    				}});
+		    	    	//add card to tablerow
+		    	    	tr.addView(card);
+		    	    	//and set card in array
+		    	    	cards[(x*i)+j] =card;
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						Log.d("Error", e.toString());
+					}    	    	
+	    	    }
+	       	    //set tablerow to tablelayout
+	    	    table.addView(tr);
+	    	}  
+		}
+     }
+     
+	@SuppressLint("DefaultLocale")
+	class MemoryTimerTask extends TimerTask {		
+		public void run() {
+			timeCounter++;
+            // update TextView
+			
+	        runOnUiThread(new Runnable() {
+	            public void run() {
+
+	            	int seconds = (int) (timeCounter) % 60 ;
+	            	int minutes = (int) ((timeCounter / 60) % 60);
+	            	int hours   = (int) ((timeCounter / (60*60)) % 24);
+	            	
+	            	String timeStr = String.format("%02d:%02d:%02d", 
+	            		    hours,
+	            		    minutes, 
+	            		    seconds
+	            		);
+	            	
+	       //stuff that updates ui
+	    			timeView.setText(timeStr);
+	           }
+	        });
+			
+		}
+		  
+		public void stopTask(){	
+	   	    Log.d("TIMER", "timer canceled");
+	   	    this.cancel();
+		}
+	}
+}

@@ -1,0 +1,18 @@
+package de.htwg.memory;
+
+import android.location.Location;
+import android.location.LocationListener;
+import android.os.Bundle;
+
+public class MemoryLocationListener implements LocationListener {
+
+    public void onLocationChanged(Location loc) {
+       Log.d("lat", String.valueOf(loc.getLatitude()));
+    }
+
+    public void onProviderDisabled(String provider) {}
+
+    public void onProviderEnabled(String provider) {}
+
+    public void onStatusChanged(String provider, int status, Bundle extras) {}
+}

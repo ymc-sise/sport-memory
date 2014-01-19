@@ -1,0 +1,199 @@
+package de.htwg.memory;
+
+import de.htwg.memory.activity.GameActivity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.AsyncTask;
+import android.util.Log;
+
+/**
+ * this class represent a game card, which can be clicked and turned each card has a common backimage
+ * two cards with the same cardid have the same unique frontimage
+ * 
+ * @author Benjamin Moellerke <bemoelle@googlemail.com>
+ * @version V1.0 17-06-2012
+ */
+public class CheckCards extends AsyncTask<Void, Void, int[]> {
+	
+	private final MemoryCard[] cards;
+	private final int row;
+	private final int col;
+	private AlertDialog alert;
+	private final GameActivity gameActivity;
+	private final MemoryConnection connection;
+	
+	/**
+	 * @param gameActivity is the GameActivity Class which calls this class
+	 * @param cards is the array of cards
+	 * @param connection 
+	 * @param row is the number ow rows in the game
+	 * @param col is the number ow rows in the game
+	 */
+	public CheckCards(final GameActivity gameActivity, MemoryConnection connection, final MemoryCard[] cards, int row, int col) {	
+	//public CheckCards(final GameActivity gameActivity, final MemoryCard[] cards, int row, int col) {	
+		super();
+		this.gameActivity = gameActivity;
+		this.connection = connection;
+		
+		/*
+		 * Critical Rule: Sonar
+		 * 
+		 * Constructors and methods receiving arrays should clone objects and store the copy. 
+		 * This prevents that future changes from the user affect the internal functionality.
+		*/
+		MemoryCard[] cardArray = cards;
+		this.cards = cardArray;
+		this.row = row;
+		this.col = col;		
+		
+		
+		//create an dialog which display the user have won the game
+		//shows tries and username
+		if(gameActivity != null) {
+			int anz = gameActivity.getTries();
+		 	String name = gameActivity.getName();
+			AlertDialog.Builder builder = new AlertDialog.Builder(gameActivity);
+			builder.setTitle("Sie haben gewonnen!")
+			       .setCancelable(false)
+			       .setMessage(name + " hat " + anz + " Versuche gebraucht.")
+			       .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			        	   gameActivity.finish();
+			           }
+			       });
+			
+			alert = builder.create();
+		}
+	}
+	
+	/**
+	 * to check which cards a clicked, only two cards can be clicked
+	 * more than two clicked cards will be ignored
+	 * 
+	 * furture information @see android.os.AsyncTask#doInBackground(Params[])
+	 */
+	@Override
+	protected int[] doInBackground(Void... params) {
+		
+		//create an cardArray which have the two clicked cards
+		//identifier is the index in the cards array
+		int[] cardArray = new int[2];
+		cardArray[0] = -1;
+		cardArray[1] = -1;
+		
+		int anzClickedCards = 0;
+		
+		for(int i=0; i<row*col; i++) {
+			
+			if(cards[i].isClicked()) {
+				cardArray[anzClickedCards++] = i;
+				
+				if(anzClickedCards >= 2) {
+					break;
+				}
+			}
+		}
+			
+		for(int i=0; i<row*col; i++) {
+			
+			if(anzClickedCards < 2 && cards[i].getWantToTurn()) {
+				cards[i].setClicked(true);
+				cards[i].setWantToTurn(false);
+				cardArray[anzClickedCards++] = i;
+				if(anzClickedCards >= 2) {
+					break;
+				}
+			}
+			else {
+				cards[i].setWantToTurn(false);
+			}
+		}
+		return cardArray;
+	}	
+	
+	/**
+	 * onPostExecute is called after doInBackground
+	 * method is necessary to flip cards in both ways(show frontimage and backimage)
+	 * 
+	 * furture information @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+	 */
+	@Override
+	protected void onPostExecute(int[] cardArray) {
+		
+		//turn the clicked cards to front
+		for(int i=0; i<2; i++) {
+			if(cardArray[i] >= 0) {
+				cards[cardArray[i]].turnFront();
+			}
+		}
+		
+		//only if two cards are clicked check whether they are couples 
+		if(cardArray[0] != -1 && cardArray[1] != -1) {
+			
+			if(cards[cardArray[0]].getTurnBack() == 0 && cards[cardArray[1]].getTurnBack() == 0) {
+				cards[cardArray[0]].setTurnBack(1);
+				cards[cardArray[1]].setTurnBack(1);
+			}
+			if(cards[cardArray[0]].getTurnBack() == 2 || cards[cardArray[1]].getTurnBack() == 2) {
+				
+				try {
+					
+					// read status from server
+					connection.readCardState(cards[cardArray[0]].getCardId(), cards[cardArray[1]].getCardId());
+					
+				} 
+				catch (Exception e) {
+		        	AlertDialog.Builder builder = new AlertDialog.Builder(gameActivity);
+		    		builder.setTitle("ERROR")
+		    		       .setCancelable(false)
+		    		       .setMessage("cannot read card state - no connection to server")
+		    		       .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+		    		           public void onClick(DialogInterface dialog, int id) {
+		    		        	   gameActivity.finish();
+		    		           }
+		    		       });
+		    		AlertDialog alert = builder.create();
+		    		alert.show();
+				}
+			}
+		}
+	}
+	
+	public void handle(int ret){
+		//int ret = 1;
+		
+		//error meesage if connection is interrupted
+		if(ret == -1) {
+        	AlertDialog.Builder builder = new AlertDialog.Builder(gameActivity);
+    		builder.setTitle("ERROR")
+    		       .setCancelable(false)
+    		       .setMessage("cannot read card state - no connection to server")
+    		       .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+    		           public void onClick(DialogInterface dialog, int id) {
+    		        	   gameActivity.finish();
+    		           }
+    		       });
+    		AlertDialog alert = builder.create();
+    		alert.show();
+		}
+
+		if(ret == 1) {
+			
+			cards[cardArray[0]].disableCard();
+			cards[cardArray[1]].disableCard();
+			
+		}
+		else if(ret == 2) {
+			alert.show();
+		}
+		else {
+			cards[cardArray[0]].turnBack();
+			cards[cardArray[0]].setTurnBack(0);
+			cards[cardArray[0]].setClicked(false);
+			
+			cards[cardArray[1]].turnBack();
+			cards[cardArray[1]].setTurnBack(0);
+			cards[cardArray[1]].setClicked(false);
+		}
+	}
+}

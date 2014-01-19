@@ -1,0 +1,4 @@
+INDEX VERSION 1.126+H:\Dokumente\FH\9sem\mobile computing\labor\.metadata\.plugins\org.eclipse.jdt.core
+1431376308.index
+916885488.index
+582404395.index

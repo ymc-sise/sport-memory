@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Sport memory</string>
+    <string name="spielen">Play</string>
+    <string name="einstellung">Settings</string>
+    <string name="impressum">About</string>
+    <string name="version10">Version 1.0</string>
+    <string name="anzKarten">Number of cards</string>
+    <string name="sechszehn">16</string>
+    <string name="vierundzwanzig">24</string>
+    <string name="zurueck">Back</string>
+    <string name="spielername">Player name</string>
+    <string name="namEingeben">Enter your name!</string>
+    <string name="sechsunddreissig">36</string>
+    <string name="tries">Tries:</string>
+    <string name="url">URL</string>
+    <string name="urlEingeben">localhost</string>
+    <string name="localhost">use LocalHost</string>
+    <string name="LocalHost">localhost</string>
+    <string name="mustermann">Mustermann</string>
+    <string name="thisisanull">0</string>
+    <string name="impress">Sport memory is a student project. You have to solve memory additionaly with your gps coordinates.</string>
+    <string name="impress2">Software licence: Apache License 2.0</string>
+    <string name="impress3"></string>
+    <string name="impress4">Developer Simon Schneeberger</string>
+    <string name="Timer">Timer:</string>
+    <string name="time">00:00:00</string>
+    <string name="latitudeLabel">Latitude:</string>
+    <string name="longitudeLabel">Longitude:</string>
+
+</resources>

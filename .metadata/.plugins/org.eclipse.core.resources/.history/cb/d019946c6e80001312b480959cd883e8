@@ -1,0 +1,27 @@
+package de.htwg.memory;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
+
+public class MemoryLocationListener implements LocationListener {
+
+    public void onLocationChanged(Location loc) {
+       Lod.d("lat", String.valueOf(loc.getLatitude()));
+    }
+
+    public void onProviderDisabled(String provider) {}
+
+    public void onProviderEnabled(String provider) {}
+
+    public void onStatusChanged(String provider, int status, Bundle extras) {}
+}

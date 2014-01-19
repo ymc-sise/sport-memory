@@ -1,0 +1,190 @@
+package de.htwg.memory;
+
+import android.content.Context;
+import android.content.res.XmlResourceParser;
+import android.graphics.drawable.Drawable;
+import android.view.View;
+import android.view.animation.Animation;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+
+/**
+ * this class represent a game card, which can be clicked and turned each card has a common backimage
+ * two cards with the same cardid have the same unique frontimage
+ * 
+ * @author Simon Schneeberger <sischnee@gmail.com>
+ * @version V1.0 18-01-2014
+ */
+public class MemoryCard extends Button {
+
+	private int cardID;
+	private Drawable backImage;
+	private Drawable frontImage;
+	private boolean clicked = false;
+	private boolean wantToTurn = false;
+	private Animation animation;
+	private int turnback;
+		
+	/**
+	 * @param context is necessary for the super-contructor 
+	 * @param x coordinate in the table view
+	 * @param y coordinate in the table view
+	 * @param cardID card identifier
+	 */
+	public MemoryCard(Context context, int cardID) {
+		super(context);
+		this.cardID = cardID;
+		this.turnback = 0;
+		//create animation
+		
+		animation = new FlipAnimation(0.0f, -30.0f, 4.0f, 1.0f);
+		backImage =  getResources().getDrawable(R.drawable.backimage);
+		setFrontImage();
+		setBackgroundDrawable(backImage);
+	}
+	
+	/**
+	 * flips the card to the frontside
+	 */
+	public void turnFront() {
+		startAnimation(animation); 
+		setBackgroundDrawable(frontImage);
+		clicked = true;
+	}
+	
+	/**
+	 * flips the card to the backside
+	 */
+	public void turnBack() {
+		startAnimation(animation);
+		setBackgroundDrawable(backImage);
+		clicked = false;
+	}
+	
+	/**
+	 * @return the cardid which is necessary to identify a couple of cards
+	 */
+	public int getCardId() {
+		return cardID;
+	}
+
+	/**
+	 * disabled the card
+	 * card is no longer clickable or visibile
+	 */
+	public void disableCard() {
+		setVisibility(View.INVISIBLE);
+		setClicked(false);
+		setEnabled(false);
+		turnback = 0;
+	}
+			
+	
+	/**
+	 * @return the clicked-state of the card
+	 */
+	public boolean isClicked() {
+		return clicked;
+	}
+
+	/**
+	 * @param clicked set the clicked-state of the card
+	 */
+	public void setClicked(boolean clicked) {
+		this.clicked = clicked;
+	}
+	
+	/**
+	 * @param turnback set the turnback state of the card
+	 */
+	public void setTurnBack(int turnback) {
+		this.turnback = turnback;	
+	}
+	
+	/**
+	 * @return the turnback state of the card
+	 */
+	public int getTurnBack() {
+		
+		return turnback;
+	}
+	
+	/**
+	 * @return the wantToTurn state of the card
+	 */
+	public boolean getWantToTurn() {
+		return wantToTurn;
+	}
+
+	/**
+	 * @param wantToTurn set the wantToTurn state of the card
+	 */
+	public void setWantToTurn(boolean wantToTurn) {
+		this.wantToTurn = wantToTurn;
+	}
+	
+	/**
+	 * set the unique frint imgae of the card
+	 * two cards have the same front image -> rule of the memory game :)
+	 */
+	private void setFrontImage() {
+		
+		switch(cardID) {
+		case 1: 
+			frontImage =  getResources().getDrawable(R.drawable.android_black);
+			break;
+		case 2:
+			frontImage =  getResources().getDrawable(R.drawable.android_blue);
+			break;
+		case 3:
+			frontImage =  getResources().getDrawable(R.drawable.android_brown);
+			break;
+		case 4:
+			frontImage =  getResources().getDrawable(R.drawable.android_gold);
+			break;
+		case 5:
+			frontImage =  getResources().getDrawable(R.drawable.android_green);
+			break;
+		case 6:
+			frontImage =  getResources().getDrawable(R.drawable.android_grey);
+			break;
+		case 7:
+			frontImage =  getResources().getDrawable(R.drawable.android_indigoblue);
+			break;
+		case 8:
+			frontImage =  getResources().getDrawable(R.drawable.android_lightblue);
+			break;
+		case 9:
+			frontImage =  getResources().getDrawable(R.drawable.android_lightgreen);
+			break;
+		case 10:
+			frontImage =  getResources().getDrawable(R.drawable.android_lightgrey);
+			break;
+		case 11:
+			frontImage =  getResources().getDrawable(R.drawable.android_lightpink);
+			break;
+		case 12:
+			frontImage =  getResources().getDrawable(R.drawable.android_lila);
+			break;
+		case 13:
+			frontImage =  getResources().getDrawable(R.drawable.android_orange);
+			break;
+		case 14:
+			frontImage =  getResources().getDrawable(R.drawable.android_pink);
+			break;
+		case 15:
+			frontImage =  getResources().getDrawable(R.drawable.android_red);
+			break;
+		case 16:
+			frontImage =  getResources().getDrawable(R.drawable.android_yellow);
+			break;
+		case 17:
+			frontImage =  getResources().getDrawable(R.drawable.android_darklila);
+			break;
+		case 18:
+			frontImage =  getResources().getDrawable(R.drawable.android_oliv);
+			break;
+		}
+	}	
+}

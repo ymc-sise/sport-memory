@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Memory</string>
+    <string name="spielen">Play</string>
+    <string name="einstellung">Einstellung</string>
+    <string name="impressum">Impressum</string>
+    <string name="version10">Version 1.0</string>
+    <string name="anzKarten">Anzahl der Karten</string>
+    <string name="sechszehn">16</string>
+    <string name="vierundzwanzig">24</string>
+    <string name="zurueck">Zurück</string>
+    <string name="spielername">Spielername</string>
+    <string name="namEingeben">Bitte Name eingaben!</string>
+    <string name="sechsunddreissig">36</string>
+    <string name="tries">tries:</string>
+    <string name="url">URL</string>
+    <string name="urlEingeben">localhost</string>
+    <string name="localhost">use LocalHost</string>
+    <string name="LocalHost">localhost</string>
+    <string name="mustermann">Mustermann</string>
+    <string name="thisisanull">0</string>
+    <string name="impress">Bei dem Projekt \"Memory-Game-App\" handelt sich um eine studentisches Projekt, welches im Rahmen einer Wahlpflichtveranstaltung realisiert wurde. Diese App soll in erster Linie Spass beim Spielen bereiten.</string>
+    <string name="impress2">Software Lizenz: Apache License 2.0</string>
+    <string name="impress3">Source Code: http://code.google.com/p/memory-game-app/</string>
+    <string name="impress4">Entwickler: Simon Schneeberger, Thorben Kohler und Benjamin Moellerke</string>
+
+</resources>
